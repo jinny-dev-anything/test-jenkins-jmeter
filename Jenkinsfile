@@ -17,13 +17,23 @@ pipeline {
             }
         }
 
+        // Windows 에서도 동작하도록 bat분기 추가
         stage('Find JMX File') {
             steps {
                 script {
-                    def jmxFile = sh(
-                        script: "ls *.jmx 2>/dev/null | head -n 1",
-                        returnStdout: true
-                    ).trim()
+                    def jmxFile = ""
+        
+                    if (isUnix()) {
+                        jmxFile = sh(
+                            script: "ls *.jmx 2>/dev/null | head -n 1",
+                            returnStdout: true
+                        ).trim()
+                    } else {
+                        jmxFile = bat(
+                            script: 'for %%f in (*.jmx) do @echo %%f',
+                            returnStdout: true
+                        ).trim()
+                    }
         
                     if (!jmxFile) {
                         error "❌ No .jmx file found in workspace!"
